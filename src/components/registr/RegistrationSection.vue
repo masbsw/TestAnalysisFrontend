@@ -6,7 +6,6 @@
           <p class="font-normal text-white text-center my-8">Хотите сохранить прогресс? Зарегистрируйтесь!</p>
           <h2 class="text-4xl text-white font-medium mb-12 text-center">Регистрация</h2>
           
-          <!-- Блок отображения ошибок -->
           <div v-if="error" class="mb-6 p-3 bg-red-500/20 text-red-300 rounded-lg text-center">
             {{ error }}
           </div>
@@ -91,7 +90,7 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    // Имитация запроса к API как в React-версии
+    // Имитация запроса к API 
     const mockResponse = {
       data: {
         id: Date.now().toString(),

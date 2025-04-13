@@ -11,7 +11,7 @@
         <transition name="slide-fade">
           <router-link 
             v-if="showTestingButton"
-            to="/testing" 
+            :to="'/testing'" 
             class="block px-4 py-2"
           >
             <li>
@@ -20,11 +20,17 @@
           </router-link>
         </transition>
 
-        <router-link to="/settings" class="block px-4 py-2">
-          <li>
-            <a class="text-white font-normal text-3xl">Настройки</a>
-          </li>
-        </router-link>
+        <transition name="slide-fade">
+          <router-link 
+            v-if="showSettingsButton"
+            :to="'/settings'" 
+            class="block px-4 py-2"
+          >
+            <li>
+              <a class="text-white font-normal text-3xl">Настройки</a>
+            </li>
+          </router-link>
+        </transition>
       </ul>
     </nav>
   </div>
@@ -34,12 +40,17 @@
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
+
 const route = useRoute()
 const showTestingButton = ref(false)
+const showSettingsButton = ref(false)
+
 
 watch(() => route.path, (newPath) => {
-  showTestingButton.value = newPath.startsWith('/cases') || newPath.startsWith('/testing') || newPath.startsWith('/testInfo') 
-}, { immediate: true })
+  showTestingButton.value = newPath.startsWith('/cases') || newPath.startsWith('/testing') || newPath.startsWith('/testInfo')
+  showSettingsButton.value = newPath !== '/'
+
+}, { immediate: true }) 
 </script>
 
 <style scoped>

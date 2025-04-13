@@ -5,13 +5,12 @@
           <h1 class="text-4xl text-white font-medium">Настройки проекта</h1>
           <button 
             @click="confirmDelete"
-            class="px-4 py-2 bg-red-500/30 text-red-400 rounded-lg hover:bg-red-500/40 transition"
+            class="px-4 py-2 bg-[#16143368] text-white rounded-lg hover:bg-[#161433c7] transition"
           >
             Удалить проект
           </button>
         </div>
   
-        <!-- Редактирование названия проекта -->
         <div class="mb-10">
           <h2 class="text-2xl text-white mb-4">Название проекта</h2>
           <div class="flex items-center gap-4">
@@ -29,7 +28,6 @@
           </div>
         </div>
   
-        <!-- Ссылка на репозиторий -->
         <div class="mb-10">
           <h2 class="text-2xl text-white mb-4">Ссылка на репозиторий</h2>
           <div class="flex items-center gap-4">
@@ -48,7 +46,6 @@
           </div>
         </div>
   
-        <!-- Участники проекта -->
         <div>
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl text-white">Участники проекта</h2>
@@ -60,7 +57,6 @@
             </button>
           </div>
   
-          <!-- Форма добавления участника -->
           <div v-if="showAddMember" class="mb-6 p-4 bg-[#1a102b5b] rounded-lg">
             <div class="grid grid-cols-2 gap-4 mb-4">
               <input
@@ -92,7 +88,6 @@
             </div>
           </div>
   
-          <!-- Таблица участников -->
           <div class="overflow-x-auto">
             <table class="w-full border-collapse">
               <thead>
@@ -125,7 +120,7 @@
                   <td class="p-3 text-right">
                     <button 
                       @click="removeMember(index)"
-                      class="text-red-400 hover:text-red-300 p-1"
+                      class="text-[#ffffff30] hover:text-[#ffffff8c] p-1"
                       title="Удалить"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +135,6 @@
         </div>
       </div>
   
-      <!-- Модальное окно подтверждения удаления -->
       <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-[#28264F] p-6 rounded-lg max-w-md w-full">
           <h3 class="text-2xl text-white mb-4">Удалить проект?</h3>
@@ -154,7 +148,7 @@
             </button>
             <button 
               @click="deleteProject"
-              class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              class="px-4 py-2 bg-[#161433] text-white rounded hover:bg-[#0c0b1d] transition"
             >
               Удалить
             </button>
@@ -170,7 +164,6 @@
   
   const router = useRouter()
   
-  // Данные проекта
   const project = ref({
     id: '1',
     name: 'Мой проект',
@@ -181,7 +174,6 @@
     ]
   })
   
-  // Добавление участника
   const showAddMember = ref(false)
   const newMember = ref({
     name: '',
@@ -200,7 +192,6 @@
     project.value.members.splice(index, 1)
   }
   
-  // Удаление проекта
   const showDeleteConfirm = ref(false)
   
   const confirmDelete = () => {
@@ -208,12 +199,10 @@
   }
   
   const deleteProject = () => {
-    // Здесь будет логика удаления проекта
     console.log('Проект удален:', project.value.id)
-    router.push('/projects') // Перенаправляем на страницу проектов
+    router.push('/cases')
   }
   
-  // Сохранение изменений
   const saveProjectName = () => {
     console.log('Название проекта сохранено:', project.value.name)
   }

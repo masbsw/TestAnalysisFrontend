@@ -7,25 +7,25 @@
                 <h4 class="font-normal text-2xl text-white text-center">Выберите формат материала</h4>
 
                 <div class="grid grid-cols-2 gap-[20%] mb-16">
-                    <button 
-                        @click="handleFileButtonClick(['.pdf', '.docx'])"
+                    <button
+                        @click="handleFileButtonClick(['.pdf', '.docx'], 'document')"
                         class="select py-4 text-black rounded hover:bg-white transition"
                     >
                         PDF/DOCX
                     </button>
-                    <button 
-                        @click="handleFileButtonClick(['.png', '.jpg', '.jpeg'])"
+                    <button
+                        @click="handleFileButtonClick(['.png', '.jpg', '.jpeg'], 'image')"
                         class="select py-4 text-black rounded hover:bg-white transition"
                     >
                         PNG/JPEG
                     </button>
-                    <button 
-                        @click="handleFileButtonClick(['.mp4', '.mov', '.avi'])"
+                    <button
+                        @click="handleFileButtonClick(['.mp4', '.mov', '.avi'], 'video')"
                         class="select py-4 text-black rounded hover:bg-white transition"
                     >
                         Видео
                     </button>
-                    <button 
+                    <button
                         @click="handleTextButtonClick"
                         class="select py-4 text-black rounded hover:bg-white transition"
                     >
@@ -34,21 +34,20 @@
                 </div>
             </div>
 
-            <!-- Текстовый ввод -->
             <div v-if="showTextInput" class="form flex-column items-center w-[60%] p-4 rounded-2xl">
-                <textarea 
+                <textarea
                     v-model="textContent"
                     class="w-full p-2 border rounded"
                     placeholder="Введите текст..."
                 ></textarea>
                 <div class="flex justify-between gap-2 mt-2">
-                    <button 
+                    <button
                         @click="clearTextInput"
                         class="px-4 py-2 bg-gray-500 text-black rounded hover:bg-gray-600 transition"
                     >
                         Отменить
                     </button>
-                    <button 
+                    <button
                         @click="submitText"
                         class="px-4 py-2 bg-[#F2E9E9] text-black rounded hover:bg-[#D6D7E7] transition"
                     >
@@ -56,30 +55,27 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Форма с прикрепленным файлом -->
             <div v-if="selectedFile" class="form flex-column items-center w-[60%] p-4 rounded-2xl">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="text-gray-500">
-                        <!-- Иконки остаются без изменений -->
                     </div>
                     <span>{{ selectedFile.name }}</span>
                 </div>
 
-                <textarea 
+                <textarea
                     v-model="fileDescription"
                     class="w-full p-2 border rounded mb-4"
                     placeholder="Введите описание файла..."
                 ></textarea>
 
                 <div class="flex justify-between gap-2">
-                    <button 
+                    <button
                         @click="clearFile"
                         class="px-4 py-2 bg-gray-500 text-black rounded hover:bg-gray-600 transition"
                     >
                         Отменить
                     </button>
-                    <button 
+                    <button
                         @click="submitFile"
                         class="px-4 py-2 bg-[#F2E9E9] text-black rounded hover:bg-[#D6D7E7] transition"
                     >
@@ -88,10 +84,9 @@
                 </div>
             </div>
 
-            <!-- Скрытый input для выбора файла -->
-            <input 
-                type="file" 
-                ref="fileInput" 
+            <input
+                type="file"
+                ref="fileInput"
                 @change="handleFileSelect"
                 class="hidden"
             />
@@ -101,22 +96,27 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileDescription = ref('');
 const showTextInput = ref(false);
 const textContent = ref('');
+const currentFileType = ref('');
+const router = useRouter();
 
-const handleFileButtonClick = (extensions) => {
-    showTextInput.value = false; // Скрываем текстовую форму при выборе файла
+const handleFileButtonClick = (extensions, fileType) => {
+    showTextInput.value = false;
+    currentFileType.value = fileType;
     const acceptString = extensions.map(ext => `${ext},${ext.toUpperCase()}`).join(',');
     fileInput.value.accept = acceptString;
     fileInput.value.click();
 };
 
 const handleTextButtonClick = () => {
-    selectedFile.value = null; // Скрываем файловую форму при выборе текста
+    selectedFile.value = null;
     showTextInput.value = true;
 };
 
@@ -124,7 +124,7 @@ const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
         selectedFile.value = file;
-        showTextInput.value = false; // Гарантируем, что текстовая форма скрыта
+        showTextInput.value = false;
     }
     event.target.value = '';
 };
@@ -143,40 +143,51 @@ const submitFile = async () => {
     if (!selectedFile.value) return;
 
     try {
-        // Читаем файл как base64
         const base64String = await readFileAsBase64(selectedFile.value);
-        
-        // Определяем правильный MIME type
-        let mimeType;
-        if (selectedFile.value.type) {
-            mimeType = selectedFile.value.type;
-        } else {
-            // Если type недоступен, определяем по расширению
-            const extension = selectedFile.value.name.split('.').pop().toLowerCase();
-            mimeType = extension === 'jpg' || extension === 'jpeg' 
-                ? 'image/jpeg' 
-                : 'image/png';
+        const payload = {
+            description: fileDescription.value,
+            base64_image: base64String,
+            image_type: "image/jpg" 
+        };
+
+        console.log('Отправка данных на сервер:', payload);
+
+        let response;
+        if (currentFileType.value === 'document') {
+            response = await axios.post('http://localhost:8001/process-document', payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        } else if (currentFileType.value === 'image') {
+            response = await axios.post('http://localhost:8001/generate-gherkin', payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        } else if (currentFileType.value === 'video') {
+            response = await axios.post('http://localhost:8001/process-video', payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        } else if (currentFileType.value === 'text') {
+            response = await axios.post('http://localhost:8001/process-text', {
+                content: textContent.value
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
         }
 
-        // Формируем строку с префиксом
-        const base64WithPrefix = `data:${mimeType};base64,${base64String}`;
+        console.log('Ответ от сервера:', response.data);
 
-        console.log('Отправка на сервер:', {
-            image: base64WithPrefix,
-            description: fileDescription.value
+        router.push({
+            name: 'TestCaseInfo',
+            params: { index: response.data.id },
+            query: { data: JSON.stringify(response.data) }
         });
-
-        // Здесь будет реальный запрос на сервер
-        // await fetch('/api/upload', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         image: base64WithPrefix,
-        //         description: fileDescription.value
-        //     }),
-        // });
 
         clearFile();
     } catch (error) {
@@ -184,13 +195,11 @@ const submitFile = async () => {
     }
 };
 
-// Вспомогательная функция для чтения файла как base64
 const readFileAsBase64 = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
-            // Удаляем префикс "data:*;base64," если он есть
-            const base64String = reader.result.split(',')[1] || reader.result;
+            const base64String = reader.result.split(',')[1];
             resolve(base64String);
         };
         reader.onerror = reject;
@@ -198,9 +207,28 @@ const readFileAsBase64 = (file) => {
     });
 };
 
-const submitText = () => {
-    console.log('Текст отправлен:', textContent.value);
-    clearTextInput();
+const submitText = async () => {
+    try {
+        const response = await axios.post('http://localhost:8001/process-text', {
+            content: textContent.value
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        console.log('Ответ от сервера:', response.data);
+
+        router.push({
+            name: 'TestCaseInfo',
+            params: { index: response.data.id },
+            query: { data: JSON.stringify(response.data) }
+        });
+
+        clearTextInput();
+    } catch (error) {
+        console.error('Ошибка при обработке текста:', error);
+    }
 };
 </script>
 
