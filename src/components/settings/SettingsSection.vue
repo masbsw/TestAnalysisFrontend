@@ -159,56 +159,107 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { ref, onMounted } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import axios from 'axios'
   
   const router = useRouter()
+  const route = useRoute()
+  const projectId = route.params.id 
   
   const project = ref({
-    id: '1',
-    name: 'Мой проект',
-    repository: '',
-    members: [
-      { name: 'Иван Иванов', role: 'Разработчик' },
-      { name: 'Петр Петров', role: 'Тестировщик' }
-    ]
+      id: projectId,
+      name: '',
+      repository: '',
+      members: []
   })
   
   const showAddMember = ref(false)
   const newMember = ref({
-    name: '',
-    role: ''
+      name: '',
+      role: ''
+  })
+  const showDeleteConfirm = ref(false)
+  const isLoading = ref(false)
+  
+  onMounted(async () => {
+      try {
+          isLoading.value = true
+          const response = await axios.get(`http://localhost:8001/projects/${projectId}`)
+          project.value = response.data
+      } catch (error) {
+          console.error('Ошибка при загрузке проекта:', error)
+      } finally {
+          isLoading.value = false
+      }
   })
   
-  const addMember = () => {
-    if (newMember.value.name.trim() && newMember.value.role.trim()) {
-      project.value.members.push({ ...newMember.value })
-      newMember.value = { name: '', role: '' }
-      showAddMember.value = false
-    }
+  const addMember = async () => {
+      if (newMember.value.name.trim() && newMember.value.role.trim()) {
+          try {
+              const response = await axios.post(
+                  `http://localhost:8001/projects/${projectId}/members`,
+                  newMember.value
+              )
+              
+              project.value.members.push(response.data)
+              newMember.value = { name: '', role: '' }
+              showAddMember.value = false
+          } catch (error) {
+              console.error('Ошибка при добавлении участника:', error)
+          }
+      }
   }
   
-  const removeMember = (index) => {
-    project.value.members.splice(index, 1)
+  const removeMember = async (index) => {
+      const memberId = project.value.members[index].id
+      try {
+          await axios.delete(
+              `http://localhost:8001/projects/${projectId}/members/${memberId}`
+          )
+          project.value.members.splice(index, 1)
+      } catch (error) {
+          console.error('Ошибка при удалении участника:', error)
+      }
   }
-  
-  const showDeleteConfirm = ref(false)
   
   const confirmDelete = () => {
-    showDeleteConfirm.value = true
+      showDeleteConfirm.value = true
   }
   
-  const deleteProject = () => {
-    console.log('Проект удален:', project.value.id)
-    router.push('/cases')
+  const deleteProject = async () => {
+      try {
+          await axios.delete(`http://localhost:8001/projects/${projectId}`)
+          router.push('/projects')
+      } catch (error) {
+          console.error('Ошибка при удалении проекта:', error)
+      } finally {
+          showDeleteConfirm.value = false
+      }
   }
   
-  const saveProjectName = () => {
-    console.log('Название проекта сохранено:', project.value.name)
+  const saveProjectName = async () => {
+      try {
+          await axios.patch(
+              `http://localhost:8001/projects/${projectId}`,
+              { name: project.value.name }
+          )
+          console.log('Название проекта сохранено')
+      } catch (error) {
+          console.error('Ошибка при сохранении названия:', error)
+      }
   }
   
-  const saveRepository = () => {
-    console.log('Ссылка на репозиторий сохранена:', project.value.repository)
+  const saveRepository = async () => {
+      try {
+          await axios.patch(
+              `http://localhost:8001/projects/${projectId}`,
+              { repository: project.value.repository }
+          )
+          console.log('Ссылка на репозиторий сохранена')
+      } catch (error) {
+          console.error('Ошибка при сохранении репозитория:', error)
+      }
   }
   </script>
   

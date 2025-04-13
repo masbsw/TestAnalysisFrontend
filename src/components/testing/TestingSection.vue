@@ -34,53 +34,56 @@
                 </div>
             </div>
 
-            <div v-if="showTextInput" class="form flex-column items-center w-[60%] p-4 rounded-2xl">
-                <textarea
-                    v-model="textContent"
-                    class="w-full p-2 border rounded"
-                    placeholder="Введите текст..."
-                ></textarea>
-                <div class="flex justify-between gap-2 mt-2">
-                    <button
-                        @click="clearTextInput"
-                        class="px-4 py-2 bg-gray-500 text-black rounded hover:bg-gray-600 transition"
-                    >
-                        Отменить
-                    </button>
-                    <button
-                        @click="submitText"
-                        class="px-4 py-2 bg-[#F2E9E9] text-black rounded hover:bg-[#D6D7E7] transition"
-                    >
-                        Отправить
-                    </button>
-                </div>
-            </div>
-            <div v-if="selectedFile" class="form flex-column items-center w-[60%] p-4 rounded-2xl">
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="text-gray-500">
+            <!-- Контейнер для формы -->
+            <div class="flex justify-center items-center w-full">
+                <div v-if="showTextInput" class="form flex-col items-center w-[60%] p-4 rounded-2xl">
+                    <textarea
+                        v-model="textContent"
+                        class="w-full p-2 border rounded"
+                        placeholder="Введите текст..."
+                    ></textarea>
+                    <div class="flex justify-between gap-2 mt-2">
+                        <button
+                            @click="clearTextInput"
+                            class="px-4 py-2 bg-gray-500 text-black rounded hover:bg-gray-600 transition"
+                        >
+                            Отменить
+                        </button>
+                        <button
+                            @click="submitText"
+                            class="px-4 py-2 bg-[#F2E9E9] text-black rounded hover:bg-[#D6D7E7] transition"
+                        >
+                            Отправить
+                        </button>
                     </div>
-                    <span>{{ selectedFile.name }}</span>
                 </div>
+                <div v-if="selectedFile" class="form flex-col items-center w-[60%] p-4 rounded-2xl">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="text-gray-500">
+                        </div>
+                        <span>{{ selectedFile.name }}</span>
+                    </div>
 
-                <textarea
-                    v-model="fileDescription"
-                    class="w-full p-2 border rounded mb-4"
-                    placeholder="Введите описание файла..."
-                ></textarea>
+                    <textarea
+                        v-model="fileDescription"
+                        class="w-full p-2 border rounded mb-4"
+                        placeholder="Введите описание файла..."
+                    ></textarea>
 
-                <div class="flex justify-between gap-2">
-                    <button
-                        @click="clearFile"
-                        class="px-4 py-2 bg-gray-500 text-black rounded hover:bg-gray-600 transition"
-                    >
-                        Отменить
-                    </button>
-                    <button
-                        @click="submitFile"
-                        class="px-4 py-2 bg-[#F2E9E9] text-black rounded hover:bg-[#D6D7E7] transition"
-                    >
-                        Отправить
-                    </button>
+                    <div class="flex justify-between gap-2">
+                        <button
+                            @click="clearFile"
+                            class="px-4 py-2 bg-gray-500 text-black rounded hover:bg-gray-600 transition"
+                        >
+                            Отменить
+                        </button>
+                        <button
+                            @click="submitFile"
+                            class="px-4 py-2 bg-[#F2E9E9] text-black rounded hover:bg-[#D6D7E7] transition"
+                        >
+                            Отправить
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -147,7 +150,7 @@ const submitFile = async () => {
         const payload = {
             description: fileDescription.value,
             base64_image: base64String,
-            image_type: "image/jpg" 
+            image_type: "image/jpg"
         };
 
         console.log('Отправка данных на сервер:', payload);
@@ -249,5 +252,11 @@ const submitText = async () => {
 
 .select:hover {
     transform: translateY(-3px);
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>
