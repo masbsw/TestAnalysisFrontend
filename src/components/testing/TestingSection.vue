@@ -1,7 +1,7 @@
 <template>
     <div class="flex-1">
         <div class="p-6">
-            <h1 class="text-4xl text-white font-medium mb-6">Анализ тест-кейса</h1>
+            <h1 class="text-4xl text-white font-medium mb-6">Создание тест-кейса</h1>
 
             <div>
                 <h4 class="font-normal text-2xl text-white text-center">Выберите формат материала</h4>
@@ -139,12 +139,63 @@ const clearTextInput = () => {
     textContent.value = '';
 };
 
-const submitFile = () => {
-    console.log('Файл отправлен:', {
-        file: selectedFile.value,
-        description: fileDescription.value
+const submitFile = async () => {
+    if (!selectedFile.value) return;
+
+    try {
+        // Читаем файл как base64
+        const base64String = await readFileAsBase64(selectedFile.value);
+        
+        // Определяем правильный MIME type
+        let mimeType;
+        if (selectedFile.value.type) {
+            mimeType = selectedFile.value.type;
+        } else {
+            // Если type недоступен, определяем по расширению
+            const extension = selectedFile.value.name.split('.').pop().toLowerCase();
+            mimeType = extension === 'jpg' || extension === 'jpeg' 
+                ? 'image/jpeg' 
+                : 'image/png';
+        }
+
+        // Формируем строку с префиксом
+        const base64WithPrefix = `data:${mimeType};base64,${base64String}`;
+
+        console.log('Отправка на сервер:', {
+            image: base64WithPrefix,
+            description: fileDescription.value
+        });
+
+        // Здесь будет реальный запрос на сервер
+        // await fetch('/api/upload', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         image: base64WithPrefix,
+        //         description: fileDescription.value
+        //     }),
+        // });
+
+        clearFile();
+    } catch (error) {
+        console.error('Ошибка при обработке файла:', error);
+    }
+};
+
+// Вспомогательная функция для чтения файла как base64
+const readFileAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Удаляем префикс "data:*;base64," если он есть
+            const base64String = reader.result.split(',')[1] || reader.result;
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
     });
-    clearFile();
 };
 
 const submitText = () => {

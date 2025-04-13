@@ -1,34 +1,65 @@
 <template>
-    <div class="container  w-[25%] rounded-lg shadow-md p-4 mr-8 flex items-center">
+  <div class="container w-[25%] rounded-lg shadow-md p-4 mr-8 flex items-center">
     <nav>
       <ul class="space-y-12">
-        <router-link to="/" class="block px-4 py-2"><li>
-          <a href="#" class=" text-white font-normal text-3xl hover:"
-            >Главная</a
-          >
-        </li></router-link>
-
-        <router-link to="/testing" class="block px-4 py-2">
+        <router-link to="/" class="block px-4 py-2">
           <li>
-          <a href="#" class=" text-white font-normal text-3xl"
-            >Тестирование</a
-          >
+            <a class="text-white font-normal text-3xl">Главная</a>
           </li>
         </router-link>
 
-        <li>
-          <a href="#" class="block px-4 py-2 text-white font-normal text-3xl">Настройки</a>
-        </li>
+        <transition name="slide-fade">
+          <router-link 
+            v-if="showTestingButton"
+            to="/testing" 
+            class="block px-4 py-2"
+          >
+            <li>
+              <a class="text-white font-normal text-3xl">Создать тест-кейс</a>
+            </li>
+          </router-link>
+        </transition>
+
+        <router-link to="/settings" class="block px-4 py-2">
+          <li>
+            <a class="text-white font-normal text-3xl">Настройки</a>
+          </li>
+        </router-link>
       </ul>
     </nav>
   </div>
-
 </template>
 
-<style scoped>
+<script setup>
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
- .container{
+const route = useRoute()
+const showTestingButton = ref(false)
+
+watch(() => route.path, (newPath) => {
+  showTestingButton.value = newPath.startsWith('/cases') || newPath.startsWith('/testing') || newPath.startsWith('/testInfo') 
+}, { immediate: true })
+</script>
+
+<style scoped>
+.container {
   background-color: rgb(28, 26, 59, 1);
 }
 
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-20px);
+  opacity: 0;
+}
 </style>
+
