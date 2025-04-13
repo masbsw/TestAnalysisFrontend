@@ -37,9 +37,25 @@
             >
               <span v-if="!isLoading">Войти</span>
               <span v-else class="flex items-center justify-center">
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Загрузка...
               </span>
@@ -47,7 +63,9 @@
 
             <div class="text-center text-gray-400 text-sm mt-6">
               Нет аккаунта?
-              <router-link to="/signup" class="text-[#c0bbbb] hover:text-[#D6D7E7] ml-1">Зарегистрироваться!</router-link>
+              <router-link to="/signup" class="text-[#c0bbbb] hover:text-[#D6D7E7] ml-1"
+                >Зарегистрироваться!</router-link
+              >
             </div>
           </form>
         </div>
@@ -65,7 +83,7 @@ const router = useRouter()
 
 const form = ref({
   username: '',
-  password: ''
+  password: '',
 })
 
 const isLoading = ref(false)
@@ -82,18 +100,49 @@ const handleAuth = async () => {
   isLoading.value = true
 
   try {
-    const response = await axios.post('http://localhost:8001/login', {
+    const response = await axios.post('http://localhost:8081/signin', {
       username: form.value.username,
-      password: form.value.password
+      password: form.value.password,
     })
 
     console.log('Успешный вход', response.data)
 
-    localStorage.setItem('token', response.data.token)
-    localStorage.setItem('user', JSON.stringify(response.data.user))
+    localStorage.setItem('token', response.data.accessToken)
+
+    const responseUser = await axios.get(`http://localhost:8081/whoami`, {
+      params: {
+        jwt: localStorage.getItem('token'),
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    // const userData.value = responseUser.data
+
+    // The expected response data would be:
+    // {
+    //     "id": 1,
+    //     "username": "habuma",
+    //     "password": "$2a$10$UdNr3AbrKO1vy.3LgzwxRe31xxTvvp1Uu9tQd5iHskvESzdRK2QXq",
+    //     "email": "user@gmail.com",
+    //     "phone": "+71983942689",
+    //     "role": "ADMIN",
+    //     "authorities": [
+    //         {
+    //             "authority": "ROLE_ADMIN"
+    //         }
+    //     ],
+    //     "accountNonExpired": true,
+    //     "accountNonLocked": true,
+    //     "credentialsNonExpired": true,
+    //     "enabled": true
+    // }
+
+    console.log(responseUser.data)
+    localStorage.setItem('user', JSON.stringify(responseUser.data))
 
     router.push('/')
-
   } catch (err) {
     console.error('Ошибка входа', err)
     error.value = 'Неверный логин или пароль'
