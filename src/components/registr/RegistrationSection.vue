@@ -5,11 +5,11 @@
         <div class="bg-[#28264F] rounded-2xl shadow-lg p-8">
           <p class="font-normal text-white text-center my-8">Хотите сохранить прогресс? Зарегистрируйтесь!</p>
           <h2 class="text-4xl text-white font-medium mb-12 text-center">Регистрация</h2>
-          
+
           <div v-if="error" class="mb-6 p-3 bg-red-500/20 text-red-300 rounded-lg text-center">
             {{ error }}
           </div>
-          
+
           <form @submit.prevent="handleSubmit" class="flex flex-col items-center space-y-8">
             <div class="w-[80%]">
               <input
@@ -48,7 +48,7 @@
             </button>
 
             <div class="text-center text-gray-400 text-sm mt-6">
-              Уже есть аккаунт? 
+              Уже есть аккаунт?
               <router-link to="/signin" class="text-[#c0bbbb] hover:text-[#D6D7E7] ml-1">Войти</router-link>
             </div>
           </form>
@@ -61,13 +61,14 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
 
 const form = ref({
-  username: '', 
+  username: '',
   password: '',
-  role: 'user' 
+  role: 'user'
 })
 
 const isLoading = ref(false)
@@ -75,7 +76,7 @@ const error = ref('')
 
 const handleSubmit = async () => {
   error.value = ''
-  
+
   // Валидация
   if (!form.value.username.trim() || !form.value.password.trim()) {
     error.value = 'Заполните все поля'
@@ -90,30 +91,21 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    // Имитация запроса к API 
-    const mockResponse = {
-      data: {
-        id: Date.now().toString(),
-        token: 'mock-token-' + Math.random().toString(36).substring(2),
-        user: {
-          username: form.value.username,
-          role: form.value.role
-        }
-      }
-    }
+    const response = await axios.post('http://localhost:8001/register', {
+      username: form.value.username,
+      password: form.value.password,
+      role: form.value.role
+    })
 
-    console.log('Успешная регистрация', mockResponse.data)
-    
-    // Сохраняем в localStorage 
-    localStorage.setItem('userId', mockResponse.data.id)
-    localStorage.setItem('token', mockResponse.data.token)
-    localStorage.setItem('user', JSON.stringify(mockResponse.data.user))
-    
-    // Перенаправляем на страницу входа
+    console.log('Успешная регистрация', response.data)
+
+    localStorage.setItem('userId', response.data.id)
+    localStorage.setItem('token', response.data.token)
+    localStorage.setItem('user', JSON.stringify(response.data.user))
+
     router.push('/signin')
-    
+
   } catch (err) {
-    // Имитация ошибки
     console.error('Ошибка регистрации', err)
     error.value = 'Произошла ошибка при регистрации'
   } finally {
